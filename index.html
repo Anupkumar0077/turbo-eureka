@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>AK AI VOICE | Pro — Black & Red (Real WAV Download)</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+    :root{
+      --bg:#0b0b0b; --card:#151515; --red:#ff0000; --muted:#bfbfbf;
+    }
+    body{
+      margin:0; font-family:'Poppins',sans-serif; background:radial-gradient(circle at 20% 10%, #220000 0%, #050505 45%, #000 100%); color:#fff;
+      -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+    }
+    header{
+      background:linear-gradient(90deg,var(--red),#6a0000); padding:28px 16px; text-align:center; box-shadow:0 6px 20px rgba(255,0,0,0.08);
+    }
+    header h1{ margin:0; font-size:28px; letter-spacing:1px; font-weight:700; text-shadow:0 2px 8px rgba(0,0,0,0.6); }
+    header p{ margin:6px 0 0; color:#ffdede; font-size:13px; }
+    main{ max-width:760px; margin:36px auto; padding:24px; background:linear-gradient(180deg, rgba(255,0,0,0.02), rgba(0,0,0,0.4)); border-radius:14px; border:1px solid rgba(255,0,0,0.06); box-shadow:0 10px 40px rgba(0,0,0,0.6); }
+    .card{ background:var(--card); padding:20px; border-radius:10px; }
+    h2{ color:#ff6b6b; margin:0 0 10px; }
+    textarea{ width:100%; height:140px; background:#070707; color:#fff; border:2px solid var(--red); border-radius:8px; padding:12px; font-size:15px; resize:vertical; }
+    .controls{ display:flex; gap:12px; flex-wrap:wrap; align-items:center; margin-top:12px; justify-content:center; }
+    select, input[type=range]{ background:#0d0d0d; color:#fff; border:1px solid rgba(255,0,0,0.18); padding:8px 10px; border-radius:8px; }
+    .ranges{ display:flex; gap:12px; flex-wrap:wrap; justify-content:center; margin-top:12px; }
+    .rangeItem{ display:flex; flex-direction:column; align-items:center; gap:6px; color:var(--muted); font-size:13px; }
+    .btn{ padding:10px 18px; border-radius:8px; font-weight:600; cursor:pointer; border:0; transition:all .13s ease; }
+    .btn.play{ background:var(--red); color:#fff; box-shadow:0 6px 18px rgba(255,0,0,0.12); }
+    .btn.download{ background:#111; color:var(--red); border:1px solid var(--red); }
+    .btn.clear{ background:#222; color:#ddd; }
+    .status{ margin-top:12px; color:var(--muted); text-align:center; font-size:13px; }
+    footer{ margin-top:30px; padding:18px 8px; text-align:center; color:#bdbdbd; border-top:1px solid rgba(255,0,0,0.06); }
+    @media (max-width:640px){ header h1{font-size:22px;} main{margin:20px;} textarea{height:120px;} }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>AK AI VOICE</h1>
+    <p>Pro Text-to-Speech — Black & Red · Real WAV download (client-side)</p>
+  </header>
+
+  <main>
+    <div class="card">
+      <h2>Text → Speech Converter</h2>
+      <p style="color:#d3a8a8; margin:6px 0 12px;">Type text below, select voice, play or download the real WAV audio file.</p>
+
+      <textarea id="ttsText" placeholder="Yahan likhiye apna text...">Namaste! AK AI VOICE mein aapka swaagat hai.</textarea>
+
+      <div class="controls">
+        <label style="display:flex;flex-direction:column;align-items:flex-start;color:var(--muted);font-size:13px;">
+          Voice:
+          <select id="voiceSelect" style="min-width:220px;">
+            <option value="en/en-us">English (en-us)</option>
+            <option value="en/en">English (generic)</option>
+            <option value="hi/hi">Hindi (hi) — if available</option>
+          </select>
+        </label>
+
+        <div style="display:flex;gap:8px;align-items:center;">
+          <button class="btn play" id="playBtn">▶ Play</button>
+          <button class="btn download" id="downloadBtn">⬇ Download WAV</button>
+          <button class="btn clear" id="clearBtn">✖ Clear</button>
+        </div>
+      </div>
+
+      <div class="ranges" style="justify-content:center;">
+        <div class="rangeItem">
+          <label style="color:#ffb3b3;">Pitch</label>
+          <input id="pitch" type="range" min="0" max="100" value="50">
+        </div>
+        <div class="rangeItem">
+          <label style="color:#ffb3b3;">Speed</label>
+          <input id="speed" type="range" min="80" max="300" value="175">
+        </div>
+        <div class="rangeItem">
+          <label style="color:#ffb3b3;">Amplitude</label>
+          <input id="amplitude" type="range" min="0" max="200" value="100">
+        </div>
+      </div>
+
+      <div class="status" id="status">Initializing TTS engine...</div>
+    </div>
+  </main>
+
+  <footer>© 2025 AK AI VOICE — Built client-side • No server required</footer>
+
+  <!-- meSpeak (from jsDelivr) -->
+  <script src="https://cdn.jsdelivr.net/gh/kripken/mespeak/mespeak.min.js"></script>
+  <script>
+    // DOM
+    const ttsText = document.getElementById('ttsText');
+    const voiceSelect = document.getElementById('voiceSelect');
+    const playBtn = document.getElementById('playBtn');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const statusEl = document.getElementById('status');
+    const pitchEl = document.getElementById('pitch');
+    const speedEl = document.getElementById('speed');
+    const ampEl = document.getElementById('amplitude');
+
+    // Load meSpeak config from jsDelivr
+    try {
+      meSpeak.loadConfig('https://cdn.jsdelivr.net/gh/kripken/mespeak/mespeak_config.json');
+    } catch (e) {
+      console.warn('Config load failed:', e);
+    }
+
+    // map voice id => file path on jsDelivr
+    const voiceMap = {
+      'en/en-us': 'voices/en/en-us.json',
+      'en/en': 'voices/en/en.json',
+      'hi/hi': 'voices/hi/hi.json'
+    };
+
+    // load initial voice
+    let activeVoice = voiceSelect.value;
+    let voiceReady = false;
+
+    async function loadVoice(id) {
+      voiceReady = false;
+      statusEl.textContent = 'Loading voice...';
+      const path = 'https://cdn.jsdelivr.net/gh/kripken/mespeak/' + (voiceMap[id] || voiceMap['en/en-us']);
+      return new Promise((resolve, reject) => {
+        // meSpeak.loadVoice sometimes accepts only a callback — try-catch style
+        try {
+          meSpeak.loadVoice(path, () => {
+            voiceReady = true;
+            activeVoice = id;
+            statusEl.textContent = 'Voice ready (' + id + ').';
+            resolve();
+          });
+        } catch (err) {
+          // fallback: try load by setting a small timeout then resolve fail
+          console.warn('loadVoice error', err);
+          reject(err);
+        }
+      });
+    }
+
+    // Initialize: load default voice
+    loadVoice(activeVoice).catch(async () => {
+      // try fallback to English en-us
+      try { await loadVoice('en/en-us'); }
+      catch(e){ statusEl.textContent = 'Voice load failed. Playback may still work.'; console.error(e); }
+    });
+
+    // change voice on select
+    voiceSelect.addEventListener('change', () => {
+      const id = voiceSelect.value;
+      loadVoice(id).catch(() => {
+        // if fails, revert select to activeVoice
+        voiceSelect.value = activeVoice;
+      });
+    });
+
+    // Playback using meSpeak (synchronous/async callback)
+    playBtn.addEventListener('click', () => {
+      const text = (ttsText.value || '').trim();
+      if (!text) { alert('Please enter some text!'); return; }
+      if (!voiceReady) { alert('Voice not ready yet — please wait a moment.'); return; }
+
+      statusEl.textContent = 'Playing...';
+      try {
+        meSpeak.speak(text, {
+          voice: voiceMap[activeVoice] ? activeVoice : 'en/en-us',
+          amplitude: +ampEl.value,
+          pitch: +pitchEl.value,
+          speed: +speedEl.value,
+          callback: () => { statusEl.textContent = 'Playback finished.'; }
+        });
+      } catch (e) {
+        console.error('Playback error:', e);
+        statusEl.textContent = 'Playback failed — see console.';
+      }
+    });
+
+    // Download: request rawdata array from meSpeak and convert to WAV
+    downloadBtn.addEventListener('click', () => {
+      const text = (ttsText.value || '').trim();
+      if (!text) { alert('Please enter some text first!'); return; }
+      if (!voiceReady) { alert('Voice not ready yet — please wait.'); return; }
+
+      statusEl.textContent = 'Rendering audio for download...';
+      try {
+        const result = meSpeak.speak(text, {
+          voice: activeVoice,
+          amplitude: +ampEl.value,
+          pitch: +pitchEl.value,
+          speed: +speedEl.value,
+          rawdata: 'array' // ask meSpeak to return PCM samples
+        });
+
+        if (!result) {
+          statusEl.textContent = 'This build/browser does not return raw audio. Playback still works.';
+          return;
+        }
+
+        // result may be array-like (numbers) or a typed array
+        let samples;
+        if (Array.isArray(result) || ArrayBuffer.isView(result)) {
+          samples = new Int16Array(result);
+        } else if (typeof result === 'string') {
+          // sometimes it's returned as base64 string; try decode
+          try {
+            const bin = atob(result);
+            const int16 = new Int16Array(bin.length / 2);
+            for (let i = 0; i < int16.length; i++) {
+              int16[i] = bin.charCodeAt(i*2) | (bin.charCodeAt(i*2+1) << 8);
+            }
+            samples = int16;
+          } catch (e) {
+            console.error('Could not parse raw string result', e);
+            statusEl.textContent = 'Could not parse generated audio.';
+            return;
+          }
+        } else {
+          statusEl.textContent = 'Unexpected data from TTS engine.';
+          return;
+        }
+
+        const wavBlob = makeWav(samples, 22050);
+        const url = URL.createObjectURL(wavBlob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'ak-ai-voice.wav';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+        statusEl.textContent = 'Download started!';
+      } catch (e) {
+        console.error('Download error:', e);
+        statusEl.textContent = 'Error while generating audio — see console.';
+      }
+    });
+
+    clearBtn.addEventListener('click', () => {
+      ttsText.value = '';
+      statusEl.textContent = '';
+    });
+
+    // WAV builder (Int16 samples)
+    function makeWav(samples, sampleRate = 22050) {
+      const buffer = samples instanceof Int16Array ? samples : new Int16Array(samples);
+      const wavBuffer = new ArrayBuffer(44 + buffer.length * 2);
+      const view = new DataView(wavBuffer);
+
+      writeString(view, 0, 'RIFF');
+      view.setUint32(4, 36 + buffer.length * 2, true);
+      writeString(view, 8, 'WAVE');
+      writeString(view, 12, 'fmt ');
+      view.setUint32(16, 16, true);
+      view.setUint16(20, 1, true); // PCM
+      view.setUint16(22, 1, true); // mono
+      view.setUint32(24, sampleRate, true);
+      view.setUint32(28, sampleRate * 2, true);
+      view.setUint16(32, 2, true);
+      view.setUint16(34, 16, true);
+      writeString(view, 36, 'data');
+      view.setUint32(40, buffer.length * 2, true);
+
+      let offset = 44;
+      for (let i = 0; i < buffer.length; i++, offset += 2) {
+        view.setInt16(offset, buffer[i], true);
+      }
+
+      return new Blob([view], { type: 'audio/wav' });
+    }
+
+    function writeString(view, offset, string) {
+      for (let i = 0; i < string.length; i++) {
+        view.setUint8(offset + i, string.charCodeAt(i));
+      }
+    }
+  </script>
+</body>
+</html>
